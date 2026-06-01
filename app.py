@@ -1,8 +1,10 @@
 from flask import Flask, render_template, jsonify, request
 import random
 from datetime import datetime
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 # 存储留言
 messages = [
@@ -81,3 +83,4 @@ def get_random():
 
 if __name__ == "__main__":
     app.run(debug=True, host="127.0.0.1", port=5000)
+    print("🚀 Flask server is running at http://127.0.0.1:5000/")
