@@ -121,7 +121,7 @@
 
 <!-- Uploaded media elements -->
 <img id="media-img" alt="" />
-<video id="media-video" loop muted playsinline></video>
+<video id="media-video" loop playsinline></video>
 
 <!-- Hidden file input -->
 <input type="file" id="file-input" accept="image/*,video/*" />
@@ -865,8 +865,8 @@ function onHandsResults(results) {
     const thumb = lm[4], index = lm[8];
     const pinchDist = Math.hypot(thumb.x - index.x, thumb.y - index.y);
 
-    // Pinch midpoint → canvas coords (x mirrored for selfie)
-    const canvasX = width - ((thumb.x + index.x) / 2) * width;
+    // Pinch midpoint → canvas coords (direct mapping, camera is non-mirrored)
+    const canvasX = ((thumb.x + index.x) / 2) * width;
     const canvasY = ((thumb.y + index.y) / 2) * height;
 
     // Match previous hand (frame-to-frame, 200px radius)
@@ -1085,12 +1085,14 @@ function onFileSelected(e) {
   if (isVid) {
     mediaVideo.src = url;
     mediaVideo.loop = true;
-    mediaVideo.muted = true;
     mediaVideo.playsInline = true;
+    // Play immediately while still in user-gesture context (required for audio)
+    mediaVideo.play().catch(() => {});
     mediaVideo.onloadedmetadata = () => {
       uploadedMedia = mediaVideo;
       mediaType = 'video';
-      mediaVideo.play();
+      // Ensure playback continues after metadata loads
+      if (mediaVideo.paused) mediaVideo.play().catch(() => {});
       calcClothRect();
       initClothGrid();
     };
